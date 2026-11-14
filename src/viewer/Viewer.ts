@@ -224,8 +224,8 @@ export class Viewer {
     const ov = this.overrides.get(id);
     for (const mesh of this.meshes[id]) {
       const ud = mesh.userData;
-      if (ov) mesh.material = ov;
-      else if (sel) mesh.material = this.selMat;
+      if (sel) mesh.material = this.selMat;
+      else if (ov) mesh.material = ov;
       else mesh.material = this.material(ud.mk, state === GHOST ? 'g' : this.hover === id ? 'h' : 'n', ud.heart);
       mesh.renderOrder = state === GHOST && !sel && !ov ? 2 : 0;
     }

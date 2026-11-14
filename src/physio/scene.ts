@@ -29,6 +29,15 @@ export function buildWant(atlas: Atlas, normal: Iterable<number>, ghost: Iterabl
 export interface FlowUniforms {
   uBeat: { value: number };
   uHeart: { value: THREE.Vector3 };
+  /** pulses per metre of distance from the origin */
+  uWaves: { value: number };
+  /** +1 outward, -1 inward; shared so a lesson can reverse flow (breathing) */
+  uDir: { value: number };
+  uStrength: { value: number };
+}
+
+export function flowUniforms(origin: THREE.Vector3, waves: number, dir = 1, strength = 1, beat?: { value: number }): FlowUniforms {
+  return { uBeat: beat ?? { value: 0 }, uHeart: { value: origin.clone() }, uWaves: { value: waves }, uDir: { value: dir }, uStrength: { value: strength } };
 }
 
 /**
@@ -36,17 +45,22 @@ export interface FlowUniforms {
  * (arteries, motor nerves), -1 toward it (veins, sensory nerves).
  */
 export function flowMaterial(opts: {
-  color: number; glow: number; dir: 1 | -1; uniforms: FlowUniforms; waves?: number; strength?: number; sharp?: boolean;
+  color: number; glow: number; uniforms: FlowUniforms; sharp?: boolean; opacity?: number;
 }): THREE.MeshStandardMaterial {
   const mat = new THREE.MeshStandardMaterial({ color: opts.color, roughness: 0.45, metalness: 0.02, side: THREE.DoubleSide });
+  if (opts.opacity !== undefined && opts.opacity < 1) {
+    mat.transparent = true;
+    mat.opacity = opts.opacity;
+    mat.depthWrite = false;
+  }
   const glow = new THREE.Color(opts.glow);
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uBeat = opts.uniforms.uBeat;
     shader.uniforms.uHeart = opts.uniforms.uHeart;
     shader.uniforms.uGlow = { value: glow };
-    shader.uniforms.uDir = { value: opts.dir };
-    shader.uniforms.uWaves = { value: opts.waves ?? 1.15 };
-    shader.uniforms.uStrength = { value: opts.strength ?? 1.0 };
+    shader.uniforms.uDir = opts.uniforms.uDir;
+    shader.uniforms.uWaves = opts.uniforms.uWaves;
+    shader.uniforms.uStrength = opts.uniforms.uStrength;
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vFlowPos;')
       .replace('#include <project_vertex>', '#include <project_vertex>\nvFlowPos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
@@ -62,7 +76,27 @@ export function flowMaterial(opts: {
         totalEmissiveRadiance += uGlow * (band * 0.9 + fine * 0.12) * uStrength;`,
       );
   };
-  mat.customProgramCacheKey = () => `flow-${opts.dir}-${opts.sharp ? 1 : 0}`;
+  mat.customProgramCacheKey = () => `flow-${opts.sharp ? 1 : 0}`;
+  return mat;
+}
+
+/** A material whose glow follows a shared 0..1 uniform (glands, contracting muscle, chambers). */
+export function glowMaterial(color: number, glow: number, level: { value: number }, opacity?: number): THREE.MeshStandardMaterial {
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0.02, side: THREE.DoubleSide });
+  if (opacity !== undefined && opacity < 1) {
+    mat.transparent = true;
+    mat.opacity = opacity;
+    mat.depthWrite = false;
+  }
+  const g = new THREE.Color(glow);
+  mat.onBeforeCompile = (shader) => {
+    shader.uniforms.uLevel = level;
+    shader.uniforms.uGlow = { value: g };
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform float uLevel;\nuniform vec3 uGlow;')
+      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += uGlow * uLevel;');
+  };
+  mat.customProgramCacheKey = () => 'glow';
   return mat;
 }
 
@@ -75,7 +109,16 @@ export class Squeezer {
   private s = new THREE.Matrix4();
   constructor(private viewer: Viewer) {}
 
-  set(id: number, pivot: THREE.Vector3, sx: number, sy: number, sz: number) {
+  set(id: number, pivot: THREE.Vector3, sx: number, sy: number, sz: number, ty = 0) {
+    this.t1.makeTranslation(pivot.x, pivot.y + ty, pivot.z);
+    this.s.makeScale(sx, sy, sz);
+    this.t2.makeTranslation(-pivot.x, -pivot.y, -pivot.z);
+    this.m.copy(this.t1).multiply(this.s).multiply(this.t2);
+    this.setMatrix(id, this.m);
+  }
+
+  /** Apply a world-space transform on top of the item's stored transform. */
+  setMatrix(id: number, world: THREE.Matrix4) {
     const node = this.viewer.nodes[id];
     if (!node) return;
     let base = this.base.get(id);
@@ -85,11 +128,7 @@ export class Squeezer {
       this.base.set(id, base);
       node.matrixAutoUpdate = false;
     }
-    this.t1.makeTranslation(pivot.x, pivot.y, pivot.z);
-    this.s.makeScale(sx, sy, sz);
-    this.t2.makeTranslation(-pivot.x, -pivot.y, -pivot.z);
-    this.m.copy(this.t1).multiply(this.s).multiply(this.t2).multiply(base);
-    node.matrix.copy(this.m);
+    node.matrix.multiplyMatrices(world, base);
     node.matrixWorldNeedsUpdate = true;
   }
 
@@ -98,6 +137,8 @@ export class Squeezer {
       const node = this.viewer.nodes[id];
       if (!node) continue;
       node.matrix.copy(base);
+      node.matrixAutoUpdate = true;
+      node.matrix.decompose(node.position, node.quaternion, node.scale);
       node.matrixWorldNeedsUpdate = true;
     }
     this.base.clear();
