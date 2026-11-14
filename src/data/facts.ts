@@ -76,7 +76,7 @@ export function systemLabel(atlas: Atlas, id: number): string {
 }
 
 /** Names to try when looking up muscle data: the item, then enclosing groups, then composites. */
-function muscleNames(atlas: Atlas, id: number): string[] {
+export function muscleNames(atlas: Atlas, id: number): string[] {
   const it = atlas.items[id];
   const names = [it.n];
   let p = it.p, depth = 0;
