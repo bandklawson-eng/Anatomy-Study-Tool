@@ -45,6 +45,29 @@ export function App() {
     return () => viewer?.dispose();
   }, []);
 
+  // centre the model in the part of the screen not covered by panels
+  useEffect(() => {
+    if (!atlas) return;
+    const update = () => {
+      const v = viewerSig.value;
+      if (!v) return;
+      const W = window.innerWidth, H = window.innerHeight;
+      let l = 0, r = 0, b = 0;
+      for (const el of document.querySelectorAll<HTMLElement>('.sidebar, .detail, .workpanel')) {
+        const rc = el.getBoundingClientRect();
+        if (rc.width === 0 || rc.height === 0) continue;
+        if (W < 861 && el.classList.contains('sidebar')) continue;
+        if (rc.width > W * 0.8) b = Math.max(b, H - rc.top);
+        else if (rc.left > W / 2) r = Math.max(r, W - rc.left);
+        else if (W >= 861) l = Math.max(l, rc.right);
+      }
+      v.setInsets(l, r, b);
+    };
+    update();
+    const id = window.setInterval(update, 350);
+    return () => window.clearInterval(id);
+  }, [atlas]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;

@@ -26,7 +26,7 @@ self.addEventListener('fetch', (event) => {
   if (isData) {
     event.respondWith(
       caches.open(DATA_CACHE).then(async (cache) => {
-        const hit = await cache.match(req, { ignoreSearch: true });
+        const hit = await cache.match(req, { ignoreSearch: true, ignoreVary: true });
         if (hit) return hit;
         const res = await fetch(req);
         if (res.ok) cache.put(req, res.clone());
@@ -36,9 +36,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   event.respondWith(
-    caches.match(req, { ignoreSearch: true }).then((hit) => {
+    caches.match(req, { ignoreSearch: true, ignoreVary: true }).then((hit) => {
       if (hit) return hit;
-      return fetch(req).catch(() => (req.mode === 'navigate' ? caches.match('./') : Response.error()));
+      return fetch(req).catch(async () => (req.mode === 'navigate' ? (await caches.match('index.html')) || Response.error() : Response.error()));
     }),
   );
 });

@@ -170,13 +170,35 @@ export class Viewer {
     };
   }
 
+  /** Panels covering the canvas (px): the model is centred in the area left uncovered. */
+  private insets = { l: 0, r: 0, b: 0 };
+  private visW = 1;
+  private visH = 1;
+
+  setInsets(l: number, r: number, b: number) {
+    l = Math.round(Math.max(0, l));
+    r = Math.round(Math.max(0, r));
+    b = Math.round(Math.max(0, b));
+    if (l === this.insets.l && r === this.insets.r && b === this.insets.b) return;
+    this.insets = { l, r, b };
+    this.resize();
+  }
+
   private resize() {
     const p = this.canvas.parentElement!;
     const w = Math.max(1, p.clientWidth);
     const h = Math.max(1, p.clientHeight);
     this.renderer.setSize(w, h, false);
-    this.camera.aspect = w / h;
+    const { l, r, b } = this.insets;
+    // keep the projection centre in the middle of the visible area
+    const vw = w + Math.abs(r - l);
+    const vh = h + b;
+    this.camera.aspect = vw / vh;
+    if (vw !== w || vh !== h) this.camera.setViewOffset(vw, vh, r > l ? r - l : 0, b, w, h);
+    else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
+    this.visW = Math.max(1, w - l - r);
+    this.visH = Math.max(1, h - b);
     this.needsRender = true;
   }
 
@@ -414,8 +436,10 @@ export class Viewer {
   focusBounds(min: number[], max: number[], opts: { dir?: THREE.Vector3; pad?: number; instant?: boolean } = {}) {
     const center = new THREE.Vector3((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2);
     const radius = Math.max(0.012, Math.hypot(max[0] - min[0], max[1] - min[1], max[2] - min[2]) / 2);
-    const vfov = (this.camera.fov * Math.PI) / 180;
-    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * this.camera.aspect);
+    // field of view of the uncovered part of the canvas
+    const full = this.camera.view ? this.camera.view.fullHeight : this.visH;
+    const vfov = 2 * Math.atan(Math.tan((this.camera.fov * Math.PI) / 360) * (this.visH / full));
+    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * (this.visW / this.visH));
     const fov = Math.min(vfov, hfov);
     const dist = (radius / Math.sin(fov / 2)) * (opts.pad ?? 1.25);
     const dir = (opts.dir ?? this.viewDir()).clone().normalize();

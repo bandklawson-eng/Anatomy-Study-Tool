@@ -112,6 +112,8 @@ export function contextWant(atlas: Atlas, ids: number[], extra: number[] = []): 
     if (L && L < depth) depth = L;
   }
   const key = atlas.meta.layerGroups[g].key;
+  // peel superficial layers only for muscles; other systems are shown whole
+  if (key !== 'muscles') depth = 10;
   const ctxNormal = new Set<number>();
   const ctxGhost = new Set<number>();
   if (key === 'muscles' || key === 'joints' || key === 'bursae') ctxNormal.add(atlas.lg('bones'));
@@ -131,7 +133,10 @@ export function contextWant(atlas: Atlas, ids: number[], extra: number[] = []): 
 
 /** Bounds padded to a minimum size so small targets keep some context. */
 export function contextBounds(atlas: Atlas, ids: number[], min = 0.16): [number[], number[]] | null {
-  const b = atlas.bounds(ids);
+  // frame one side of a paired structure
+  const side = atlas.items[ids[0]]?.sd;
+  const one = side ? ids.filter((i) => !atlas.items[i].sd || atlas.items[i].sd === side) : ids;
+  const b = atlas.bounds(one);
   if (!b) return null;
   const out: [number[], number[]] = [b[0].slice(), b[1].slice()];
   for (let k = 0; k < 3; k++) {

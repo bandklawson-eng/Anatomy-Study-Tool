@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import type { Atlas } from '../data/meta';
 import { muscleAttachments } from '../data/facts';
-import { mode, pickHandler, sceneOverride, select, viewerSig } from '../state';
+import { mode, pickHandler, sceneOverride, select, showToast, viewerSig } from '../state';
 import { Icon } from '../ui/icons';
 import {
   FIELD_LABEL, buildQueue, contextBounds, contextWant, deckStats, getDecks, nearbyCards, preview, questionFor, quizHistory, rate, recordQuiz, resetProgress, shuffle, streak,
@@ -396,7 +396,7 @@ function confirmReset(): boolean {
   const now = Date.now();
   if (now - resetArmed < 3000) { resetArmed = 0; return true; }
   resetArmed = now;
-  import('../state').then((s) => s.showToast('Tap again to reset all flashcard progress'));
+  showToast('Tap again to reset all flashcard progress');
   return false;
 }
 
