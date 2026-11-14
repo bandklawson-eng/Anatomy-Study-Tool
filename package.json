@@ -1,0 +1,32 @@
+{
+  "name": "anatomy-study-tool",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Installable 3D human anatomy atlas with physiology animations, quizzes and flashcards",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "data:fetch": "bash pipeline/fetch-sources.sh",
+    "data:build": "node pipeline/build-data.mjs"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.11.4",
+    "preact": "^10.24.0",
+    "three": "^0.170.0",
+    "three-mesh-bvh": "^0.8.3"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.1.0",
+    "@gltf-transform/extensions": "^4.1.0",
+    "@gltf-transform/functions": "^4.1.0",
+    "@preact/preset-vite": "^2.9.0",
+    "@types/three": "^0.170.0",
+    "fbx2gltf": "^0.9.7-p1",
+    "meshoptimizer": "^0.22.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0"
+  }
+}
