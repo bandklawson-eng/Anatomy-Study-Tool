@@ -10,7 +10,7 @@ function serviceWorker(): Plugin {
     name: 'anatomy-service-worker',
     apply: 'build',
     closeBundle() {
-      const dist = path.resolve(__dirname, 'dist');
+      const dist = path.resolve(__dirname, process.env.OUT_DIR || 'dist');
       const shell: string[] = ['./'];
       const data: string[] = [];
       const walk = (dir: string) => {

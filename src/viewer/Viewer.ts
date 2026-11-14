@@ -67,6 +67,7 @@ export class Viewer {
   onHover: (id: number, x: number, y: number) => void = () => {};
   onLoading: (pending: number) => void = () => {};
   onPinClick: (landmarkIndex: number) => void = () => {};
+  onError: (message: string) => void = () => {};
 
   constructor(canvas: HTMLCanvasElement, labelLayer: HTMLDivElement, atlas: Atlas) {
     this.atlas = atlas;
@@ -295,14 +296,31 @@ export class Viewer {
     await Promise.all([...cs].map((c) => this.loadChunk(c)));
   }
 
+  /** Loads a geometry chunk. Some hosts only serve text, so a build can ship chunks as base64 (.glb.txt). */
+  private fetchChunk(file: string) {
+    if (import.meta.env.VITE_GEO_B64) {
+      return fetch(`${DATA_BASE}geo/${file}.txt`)
+        .then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.text();
+        })
+        .then((b64) => {
+          const bin = atob(b64.trim());
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return this.loader.parseAsync(bytes.buffer, DATA_BASE);
+        });
+    }
+    return this.loader.loadAsync(`${DATA_BASE}geo/${file}`);
+  }
+
   loadChunk(c: number): Promise<void> {
     if (this.chunkPromise[c]) return this.chunkPromise[c]!;
     this.chunkState[c] = 1;
     this.pending++;
     this.onLoading(this.pending);
     const info = this.atlas.meta.chunks[c];
-    const p = this.loader
-      .loadAsync(`${DATA_BASE}geo/${info.f}`)
+    const p = this.fetchChunk(info.f)
       .then((gltf) => {
         const heartLg = this.atlas.lg('heart');
         for (const node of [...gltf.scene.children]) {
@@ -323,6 +341,7 @@ export class Viewer {
       })
       .catch((err) => {
         console.error('Failed to load geometry', info.f, err);
+        this.onError(`Could not load part of the 3D model (${info.f}). Check your connection and try again.`);
         this.chunkState[c] = 0;
         this.chunkPromise[c] = null;
       })

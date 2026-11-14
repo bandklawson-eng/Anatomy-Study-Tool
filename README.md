@@ -51,8 +51,15 @@ Recorded here so they can be revisited.
 5. **Physiology is taught with an accurate schematic beside the 3D model.** The 3D heart beats
    and the vessels pulse in sync, while a 2D diagram shows exactly which valves are open and
    where blood goes in each phase, because blood paths inside a real heart are hard to see.
-6. **Study progress is stored on the device** (no accounts). Exporting/importing progress can be
-   added later.
+6. **Study progress is stored on the device** (no accounts). Flashcards use spaced repetition
+   (Again / Hard / Good / Easy, intervals from a minute to months). Decks are generated from the
+   atlas, so every structure is quizzable; muscle decks use the curated facts. Exporting and
+   importing progress can be added later.
+8. **Physiology lessons pair the model with schematics.** Each lesson animates the 3D structures
+   (heart chambers squeeze, valves turn green when open, vessels pulse in the direction of flow,
+   lungs and diaphragm move, nerves carry impulses) and a 2D diagram shows what cannot be seen
+   at this scale (cells, alveoli, sarcomeres, nephrons). Timings and pressures are textbook
+   resting values, simplified for teaching.
 7. **Non-commercial use.** A few source models (inner ear, kidney) are licensed
    non-commercially, so the app as a whole is for personal study, not for sale.
 
@@ -60,6 +67,9 @@ Recorded here so they can be revisited.
 
 - Some small muscles (several of the palate, tongue and perineum) and many small named vessels
   and nerve branches are not modelled in the source data.
+- Not modelled at all in the open atlas: the female reproductive organs, the ileum, caecum,
+  rectum and anal canal, the thoracic duct, and the anterior leaflet of the mitral and tricuspid
+  valves. Lessons mention these where relevant. They are the first candidates for added models.
 - Microscopic anatomy (cells, nephrons, alveoli, synapses) is shown in the physiology lessons as
   diagrams, not as 3D anatomy.
 

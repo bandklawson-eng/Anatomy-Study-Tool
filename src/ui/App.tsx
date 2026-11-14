@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { loadAtlas, type Atlas } from '../data/meta';
 import { Viewer } from '../viewer/Viewer';
 import {
-  bindViewer, detailOpen, fadeOthers, hideItems, hoverInfo, initState, isolate, isolated, loading, mode, panel, pickHandler, sceneOverride, select, selectedSet, selection, toast, viewerSig,
+  bindViewer, detailOpen, fadeOthers, hideItems, hoverInfo, initState, isolate, isolated, loading, mode, panel, pickHandler, sceneOverride, select, selectedSet, selection, showToast, toast, viewerSig,
 } from '../state';
 import { Icon, Logo } from './icons';
 import { Search } from './Search';
@@ -34,6 +34,7 @@ export function App() {
           if (h) h(id);
           else if (mode.value === 'explore') select(id >= 0 ? id : null);
         };
+        viewer.onError = (msg) => showToast(msg);
         viewer.onHover = (id, x, y) => (hoverInfo.value = id >= 0 ? { id, x, y } : null);
         if (window.innerWidth >= 861) panel.value = 'layers';
         (window as any).viewer = viewer;
