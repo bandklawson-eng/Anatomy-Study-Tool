@@ -158,6 +158,29 @@ export class Viewer {
     }
   };
 
+  private flashOff: (() => void) | null = null;
+
+  /** Make highlighted structures pulse so they are easy to spot (used by quizzes). */
+  setFlash(on: boolean) {
+    const base = new THREE.Color(SEL_COLOR);
+    if (on && !this.flashOff) {
+      const hot = new THREE.Color(0xfff2b0);
+      this.flashOff = this.addFrame((t) => {
+        const k = 0.5 + 0.5 * Math.sin(t * Math.PI * 2 * 1.3);
+        this.selMat.color.copy(base).lerp(hot, 0.7 * k);
+        this.selMat.emissive.setRGB(1, 0.62, 0.08);
+        this.selMat.emissiveIntensity = 0.12 + 0.9 * k;
+      });
+    } else if (!on && this.flashOff) {
+      this.flashOff();
+      this.flashOff = null;
+      this.selMat.color.copy(base);
+      this.selMat.emissive.set(0x7a4b00);
+      this.selMat.emissiveIntensity = 0.55;
+      this.needsRender = true;
+    }
+  }
+
   invalidate() {
     this.needsRender = true;
   }

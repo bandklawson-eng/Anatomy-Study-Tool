@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { signal } from '@preact/signals';
+import { GHOST, NORMAL } from '../viewer/Viewer';
 import type { Atlas } from '../data/meta';
 import { muscleAttachments } from '../data/facts';
 import { mode, pickHandler, sceneOverride, select, showToast, viewerSig } from '../state';
@@ -23,10 +25,19 @@ function savePref(k: string, v: unknown) {
 }
 
 /** Show a card's structures in 3D with context and frame them. */
+/** "See through": everything except the asked-about structure is faded. */
+const seeThrough = signal(loadPref('study.xray', false));
+
 function showCard(atlas: Atlas, c: Card, opts: { extra?: number[]; highlight?: boolean; frame?: boolean; wrong?: number | null } = {}) {
   const sel = new Set<number>(opts.highlight === false ? [] : c.ids);
   if (opts.wrong != null) sel.add(opts.wrong);
-  sceneOverride.value = { want: contextWant(atlas, c.ids, opts.extra), selected: sel };
+  const want = contextWant(atlas, c.ids, opts.extra);
+  if (seeThrough.value && opts.highlight !== false) {
+    const keep = new Set([...c.ids, ...(opts.extra || []), ...(opts.wrong != null ? [opts.wrong] : [])]);
+    for (let i = 0; i < want.length; i++) if (want[i] === NORMAL && !keep.has(i)) want[i] = GHOST;
+  }
+  sceneOverride.value = { want, selected: sel };
+  viewerSig.value?.setFlash(sel.size > 0);
   if (opts.frame !== false) {
     const v = viewerSig.value;
     const b = contextBounds(atlas, c.ids);
@@ -75,7 +86,7 @@ function Flashcards({ atlas, decks }: { atlas: Atlas; decks: Deck[] }) {
       ? card.ids.flatMap((id) => muscleAttachments(atlas, id).filter((a) => a.kind === (card.field === 'o' ? 'o' : 'e')).map((a) => a.att))
       : [];
     showCard(atlas, card, { extra, frame: !shown });
-  }, [card, shown]);
+  }, [card, shown, seeThrough.value]);
 
   useEffect(() => {
     if (!queue) {
@@ -149,6 +160,7 @@ function Flashcards({ atlas, decks }: { atlas: Atlas; decks: Deck[] }) {
         <button class="btn small" onClick={() => setQueue(null)}><Icon name="back" />Decks</button>
         <span><b>{queue.length}</b> left</span>
         <span><b>{done}</b> done</span>
+        <span style="margin-left:auto"><SeeThroughToggle onChange={() => undefined} /></span>
       </div>
       <div class="card">
         <p class="small muted">{card.kind === 'fact' ? FIELD_LABEL[card.field!] : deck.title}</p>
@@ -232,7 +244,7 @@ function Quiz({ atlas, decks }: { atlas: Atlas; decks: Deck[] }) {
         if (v && b) v.focusBounds(b[0], b[1], { pad: 1.2 });
       }
     } else showCard(atlas, q.card, { frame: answer === null });
-  }, [q, finished]);
+  }, [q, finished, seeThrough.value]);
 
   useEffect(() => {
     if (!q || m !== 'find' || finished) { if (q) pickHandler.value = () => {}; return; }
@@ -316,6 +328,7 @@ function Quiz({ atlas, decks }: { atlas: Atlas; decks: Deck[] }) {
         <button class="btn small" onClick={() => setRound(null)}><Icon name="back" />Quit</button>
         <span>Question <b>{idx + 1}</b> of {round.length}</span>
         <span>Score <b>{score}</b></span>
+        <span style="margin-left:auto"><SeeThroughToggle onChange={() => undefined} /></span>
       </div>
       {m === 'name' ? (
         <>
@@ -401,8 +414,17 @@ function confirmReset(): boolean {
 }
 
 // ------------------------------------------------------------------ panel
+function SeeThroughToggle({ onChange }: { onChange: () => void }) {
+  return (
+    <button class={`chip ${seeThrough.value ? 'on' : ''}`} onClick={() => { seeThrough.value = !seeThrough.value; savePref('study.xray', seeThrough.value); onChange(); }} title="Fade everything except the structure being asked about">
+      See through
+    </button>
+  );
+}
+
 export function StudyPanel({ atlas }: { atlas: Atlas }) {
   const decks = useMemo(() => getDecks(atlas), [atlas]);
+  useEffect(() => () => viewerSig.value?.setFlash(false), []);
   const [tab, setTab] = useState<Tab>(() => loadPref('study.tab', 'cards'));
   const go = (t: Tab) => { setTab(t); savePref('study.tab', t); sceneOverride.value = null; pickHandler.value = null; viewerSig.value?.resetView(); };
   return (

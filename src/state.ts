@@ -98,6 +98,7 @@ export function bindViewer(viewer: Viewer, atlas: Atlas) {
     const ov = sceneOverride.value;
     if (ov) viewer.apply(ov.want, ov.selected);
     else {
+      viewer.setFlash(false);
       // a bone showing its attachment map keeps its natural colour so the map stays readable
       let sel = selectedSet.value;
       const att = shownAttachments.value;
