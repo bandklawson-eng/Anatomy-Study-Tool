@@ -35,6 +35,14 @@ export function App() {
           else if (mode.value === 'explore') select(id >= 0 ? id : null);
         };
         viewer.onError = (msg) => showToast(msg);
+        try {
+          if (!localStorage.getItem('atlas.disclaimer')) {
+            localStorage.setItem('atlas.disclaimer', '1');
+            setTimeout(() => showToast('A study aid, not a medical reference: check important details against your textbook. More in About (i).', 7000), 1500);
+          }
+        } catch {
+          /* ignore */
+        }
         viewer.onHover = (id, x, y) => (hoverInfo.value = id >= 0 ? { id, x, y } : null);
         if (window.innerWidth >= 861) panel.value = 'layers';
         (window as any).viewer = viewer;
@@ -107,6 +115,7 @@ export function App() {
             <div style="width:64px;margin:0 auto"><Logo /></div>
             <h1>Anatomy Atlas</h1>
             {error ? <p style="color:var(--red)">{error}</p> : <><p class="muted">Loading the human body…</p><div class="spinner" /></>}
+            <p class="small muted" style="margin-top:18px">A study aid: check important details against your textbook.</p>
           </div>
         </div>
       )}

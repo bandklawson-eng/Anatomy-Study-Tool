@@ -31,6 +31,10 @@ export function About({ atlas, onClose }: { atlas: Atlas; onClose: () => void })
           A 3D atlas of the human body with {structures.toLocaleString()} separately selectable structures, {atlas.landmarks.length.toLocaleString()} named
           landmarks and {atlas.items.filter((i) => i.y === 'a').length} muscle attachment areas, plus physiology animations, quizzes and flashcards.
         </p>
+        <p class="notice">
+          <b>A study aid, not a medical reference.</b> The models and text come from open sources and are simplified for teaching, and some
+          parts are approximate. Check anything important against your textbook or instructor. Not for diagnosis or treatment.
+        </p>
 
         <h3>Install and use offline</h3>
         <ul>

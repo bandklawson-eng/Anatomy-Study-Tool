@@ -219,10 +219,10 @@ export function isolate(ids: number[] | null) {
 }
 
 let toastTimer: number | undefined;
-export function showToast(msg: string) {
+export function showToast(msg: string, ms = 2600) {
   toast.value = msg;
   clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => (toast.value = null), 2600);
+  toastTimer = window.setTimeout(() => (toast.value = null), ms);
 }
 
 export { HIDDEN, NORMAL, GHOST };

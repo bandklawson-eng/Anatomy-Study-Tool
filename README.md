@@ -7,6 +7,10 @@ quizzes and flashcards. It runs in any modern browser and installs as an app on 
 Windows, Mac and Chromebook. After installing (and pressing "Download everything for offline
 use" in About) it works without internet.
 
+**A study aid, not a medical reference.** The models and text come from open sources and are
+simplified for teaching; some parts are approximate. Check anything important against a textbook
+or instructor. Not for diagnosis or treatment.
+
 ## Using it
 
 - **Explore**: tap a structure to select it. Drag to rotate, pinch or scroll to zoom, right-drag

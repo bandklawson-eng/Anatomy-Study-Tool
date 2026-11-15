@@ -363,3 +363,5 @@ select { height: 36px; border-radius: 10px; border: 1px solid var(--line2); back
   .search:focus-within input::placeholder { color: var(--muted); }
   .tabs button { padding: 6px 8px; }
 }
+
+.notice { padding: 10px 12px; border-radius: 10px; background: rgba(255, 196, 87, 0.1); border: 1px solid rgba(255, 196, 87, 0.3); font-size: 14px; }
