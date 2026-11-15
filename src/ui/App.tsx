@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { loadAtlas, type Atlas } from '../data/meta';
+import { loadAtlas } from '../data/meta';
 import { Viewer } from '../viewer/Viewer';
 import {
-  bindViewer, detailOpen, fadeOthers, hideItems, hoverInfo, initState, isolate, isolated, loading, mode, panel, pickHandler, sceneOverride, select, selectedSet, selection, showToast, toast, viewerSig,
+  atlasSig, bindViewer, detailOpen, setSex, sex, fadeOthers, hideItems, hoverInfo, initState, isolate, isolated, loading, mode, panel, pickHandler, sceneOverride, select, selectedSet, selection, showToast, toast, viewerSig,
 } from '../state';
 import { Icon, Logo } from './icons';
 import { Search } from './Search';
@@ -17,17 +17,17 @@ import { StudyPanel } from '../study/StudyPanel';
 export function App() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const labels = useRef<HTMLDivElement>(null);
-  const [atlas, setAtlas] = useState<Atlas | null>(null);
+  const atlas = atlasSig.value;
   const [error, setError] = useState<string | null>(null);
   const [about, setAbout] = useState(false);
 
   useEffect(() => {
     let viewer: Viewer | null = null;
     loadAtlas()
-      .then((a) => {
-        initState(a);
-        viewer = new Viewer(canvas.current!, labels.current!, a);
-        bindViewer(viewer, a);
+      .then((full) => {
+        const a = initState(full);
+        viewer = new Viewer(canvas.current!, labels.current!, full);
+        bindViewer(viewer);
         viewer.resetView();
         viewer.onPick = (id) => {
           const h = pickHandler.value;
@@ -40,7 +40,6 @@ export function App() {
         (window as any).viewer = viewer;
         (window as any).atlas = a;
         (window as any).app = stateModule;
-        setAtlas(a);
       })
       .catch((e) => setError(String(e?.message || e)));
     return () => viewer?.dispose();
@@ -120,6 +119,22 @@ export function App() {
           <button class={m === 'physio' ? 'on' : ''} onClick={() => setMode('physio')}>Physiology</button>
           <button class={m === 'study' ? 'on' : ''} onClick={() => setMode('study')}>Study</button>
         </nav>
+        {atlas?.full?.meta.female && (
+          <div class="sexswitch" role="group" aria-label="Body">
+            <button class={sex.value === 'm' ? 'on' : ''} aria-pressed={sex.value === 'm'} aria-label="Male body" title="Male body" onClick={() => setSex('m')}>
+              <span class="sym">♂</span><span class="lbl">Male</span>
+            </button>
+            <button class={sex.value === 'f' ? 'on' : ''} aria-pressed={sex.value === 'f'} aria-label="Female body" title="Female body" onClick={() => setSex('f')}>
+              <span class="sym">♀</span><span class="lbl">Female</span>
+            </button>
+          </div>
+        )}
+        {atlas?.full?.meta.female && (
+          <button class="iconbtn sextoggle" aria-label={sex.value === 'm' ? 'Male body shown. Switch to female' : 'Female body shown. Switch to male'}
+            title={sex.value === 'm' ? 'Male body (tap for female)' : 'Female body (tap for male)'} onClick={() => setSex(sex.value === 'm' ? 'f' : 'm')}>
+            <span class="sym">{sex.value === 'm' ? '♂' : '♀'}</span>
+          </button>
+        )}
         <button class="iconbtn" aria-label="About, offline use and credits" onClick={() => setAbout(true)}><Icon name="info" /></button>
       </header>
       {atlas && m === 'explore' && (
@@ -130,8 +145,8 @@ export function App() {
           {selection.value === null && !panel.value && window.innerWidth < 861 && detailOpen.value && null}
         </>
       )}
-      {atlas && m === 'physio' && <PhysioPanel atlas={atlas} />}
-      {atlas && m === 'study' && <StudyPanel atlas={atlas} />}
+      {atlas && m === 'physio' && <PhysioPanel key={atlas.sex} atlas={atlas} />}
+      {atlas && m === 'study' && <StudyPanel key={atlas.sex} atlas={atlas} />}
       {loading.value > 0 && <div class="loading-pill"><div class="spinner" />Loading anatomy…</div>}
       {hov && atlas && m === 'explore' && <div class="tooltip" style={`left:${hov.x}px;top:${hov.y}px`}>{atlas.displayName(hov.id)}</div>}
       {toast.value && <div class="toast" role="status">{toast.value}</div>}

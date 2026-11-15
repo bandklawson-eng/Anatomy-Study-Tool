@@ -28,4 +28,17 @@ for pair in "CardioVascular41:cardio" "Joints100:joints" "LymphoidOrgans100:lymp
   src="${pair%%:*}"; out="${pair##*:}"
   [ -f "$RAW/$out.glb" ] || "$FBX2GLTF" --binary --input "$M/$src.fbx" --output "$RAW/$out"
 done
+# Female anatomy: HuBMAP Human Reference Atlas 3D Reference Object Library (CC BY 4.0)
+# https://github.com/hubmapconsortium/ccf-3d-reference-object-library
+HRA_COMMIT=f1a3a63f110e27ff0736047d52d04dba5d3087f9
+if [ ! -d "$SRC/hra/.git" ]; then
+  git clone --filter=blob:none --no-checkout https://github.com/hubmapconsortium/ccf-3d-reference-object-library "$SRC/hra"
+  git -C "$SRC/hra" sparse-checkout init --no-cone
+  git -C "$SRC/hra" sparse-checkout set '/README.md' '/LICENSE*' \
+    '/VH_Female/v1.2/VH_F_Uterus.glb' '/VH_Female/v1.2/VH_F_Ovary_*.glb' '/VH_Female/v1.2/VH_F_Fallopian_Tube_*.glb' \
+    '/VH_Female/v1.2/VH_F_Vagina.glb' '/VH_Female/v1.2/VH_F_Ligaments_Uterus_Ovaries.glb' \
+    '/VH_Female/v1.2/VH_F_Blood_Vasculature_Uterus.glb' '/VH_Female/v1.2/VH_F_Pelvis.glb' \
+    '/VH_Female/v1.2/VH_F_Urinary_Bladder.glb' '/VH_Female/v1.2/VH_F_Skin.glb' '/VH_Female/v1.3/VH_F_mammary_gland_*.glb'
+  git -C "$SRC/hra" checkout "$HRA_COMMIT"
+fi
 echo "Sources ready in $SRC"

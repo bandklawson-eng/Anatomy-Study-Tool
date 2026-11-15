@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "data:fetch": "bash pipeline/fetch-sources.sh",
-    "data:build": "node pipeline/build-data.mjs",
+    "data:build": "node pipeline/build-data.mjs && node pipeline/add-female.mjs",
     "build:text-host": "bash pipeline/build-artifact.sh"
   },
   "dependencies": {

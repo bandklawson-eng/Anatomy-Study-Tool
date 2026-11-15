@@ -19,7 +19,13 @@ function useArticle(atlas: Atlas, d: number | undefined): Article | null | undef
   return art;
 }
 
-function ArticleView({ art, name }: { art: Article | null | undefined; name: string }) {
+/** Descriptions written for this app (the female structures) rather than taken from Wikipedia. */
+function ownText(atlas: Atlas, d: number | undefined) {
+  const f = atlas.meta.female;
+  return !!f && d !== undefined && d >= f.descBucket * atlas.meta.descPerBucket;
+}
+
+function ArticleView({ art, name, own }: { art: Article | null | undefined; name: string; own?: boolean }) {
   const [more, setMore] = useState(false);
   useEffect(() => setMore(false), [art]);
   if (art === undefined) return <p class="muted small">Loading description…</p>;
@@ -37,7 +43,7 @@ function ArticleView({ art, name }: { art: Article | null | undefined; name: str
       {(art.sections.length > 0 || art.intro.length > 3) && (
         <button class="btn small" onClick={() => setMore(!more)}>{more ? 'Show less' : 'Read the full article'}</button>
       )}
-      <p class="small muted" style="margin-top:10px">Text adapted from Wikipedia via Z-Anatomy (CC BY-SA).</p>
+      <p class="small muted" style="margin-top:10px">{own ? 'Text written for this app from standard anatomy references.' : 'Text adapted from Wikipedia via Z-Anatomy (CC BY-SA).'}</p>
     </div>
   );
 }
@@ -289,7 +295,7 @@ function ItemCard({ atlas, id, pins }: { atlas: Atlas; id: number; pins: number[
 
         <div class="sect">
           <h3>About</h3>
-          <ArticleView art={art} name={it.n} />
+          <ArticleView art={art} name={it.n} own={ownText(atlas, it.d)} />
         </div>
       </div>
     </>

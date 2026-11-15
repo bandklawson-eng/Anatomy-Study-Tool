@@ -30,7 +30,11 @@ export interface Item {
   mi?: number;
   /** attachment kind: o = origin, e = insertion */
   ak?: 'o' | 'e';
+  /** only in the male (m) or female (f) body */
+  sx?: 'm' | 'f';
 }
+
+export type Sex = 'm' | 'f';
 
 export interface Landmark {
   n: string;
@@ -59,6 +63,7 @@ export interface MetaFile {
   descBuckets: number;
   items: Item[];
   landmarks: Landmark[];
+  female?: { start: number; descBucket: number; source: string };
 }
 
 export class Atlas {
@@ -77,6 +82,29 @@ export class Atlas {
   attachByBone = new Map<number, number[]>();
   lgIndex = new Map<string, number>();
   roots: number[] = [];
+  sex: Sex = 'm';
+
+  /** The atlas as seen in one body: structures of the other sex are marked removed. */
+  forSex(sex: Sex): Atlas {
+    const base = this.full ?? this;
+    const src = base.meta.items;
+    const off = new Uint8Array(src.length);
+    const items = src.map((it, i) => {
+      if ((it.sx && it.sx !== sex) || (it.p >= 0 && off[it.p])) {
+        off[i] = 1;
+        const { g: _g, ...rest } = it;
+        return { ...rest, y: 'x' as const };
+      }
+      return it;
+    });
+    const a = new Atlas({ ...base.meta, items });
+    a.sex = sex;
+    a.full = base;
+    return a;
+  }
+
+  /** the unfiltered atlas (both bodies), used for geometry */
+  full: Atlas | null = null;
 
   constructor(meta: MetaFile) {
     this.meta = meta;

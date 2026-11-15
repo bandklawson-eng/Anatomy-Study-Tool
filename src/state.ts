@@ -1,5 +1,5 @@
 import { signal, computed, effect, batch } from '@preact/signals';
-import type { Atlas } from './data/meta';
+import type { Atlas, Sex } from './data/meta';
 import { GHOST, HIDDEN, NORMAL, Viewer } from './viewer/Viewer';
 
 export type Mode = 'explore' | 'physio' | 'study';
@@ -38,7 +38,41 @@ export const pickHandler = signal<((id: number) => void) | null>(null);
 
 export const DEFAULT_ON = ['muscles', 'bones', 'joints'];
 
-export function initState(atlas: Atlas) {
+/** which body is shown */
+export const sex = signal<Sex>('m');
+
+function savedSex(): Sex {
+  try {
+    return localStorage.getItem('atlas.sex') === 'f' ? 'f' : 'm';
+  } catch {
+    return 'm';
+  }
+}
+
+/** Switches between the male and female body. Clears anything that pointed at the old body. */
+export function setSex(s: Sex) {
+  const cur = atlasSig.value;
+  if (!cur || cur.sex === s) return;
+  const next = cur.forSex(s);
+  try {
+    localStorage.setItem('atlas.sex', s);
+  } catch {
+    /* ignore */
+  }
+  batch(() => {
+    selection.value = null;
+    selLandmark.value = null;
+    shownAttachments.value = new Set();
+    isolated.value = null;
+    hidden.value = new Set([...hidden.value].filter((i) => next.items[i].y !== 'x'));
+    sex.value = s;
+    atlasSig.value = next;
+  });
+}
+
+export function initState(full: Atlas): Atlas {
+  const s = full.meta.female ? savedSex() : 'm';
+  const atlas = full.forSex(s);
   const groups = atlas.meta.layerGroups;
   let on = groups.map((g) => DEFAULT_ON.includes(g.key));
   let depth = groups.map(() => 10);
@@ -54,8 +88,10 @@ export function initState(atlas: Atlas) {
   batch(() => {
     lgOn.value = on;
     lgDepth.value = depth;
+    sex.value = s;
     atlasSig.value = atlas;
   });
+  return atlas;
 }
 
 /** Ids highlighted by the current selection. */
@@ -91,11 +127,12 @@ export function computeWant(atlas: Atlas): Uint8Array {
   return want;
 }
 
-export function bindViewer(viewer: Viewer, atlas: Atlas) {
+export function bindViewer(viewer: Viewer) {
   viewerSig.value = viewer;
   viewer.onLoading = (n) => (loading.value = n);
   effect(() => {
     const ov = sceneOverride.value;
+    const atlas = atlasSig.value!;
     if (ov) viewer.apply(ov.want, ov.selected);
     else {
       viewer.setFlash(false);

@@ -228,7 +228,7 @@ const kidneys: Lesson = {
 };
 
 // ------------------------------------------------------------------ hormones
-const glands = ['Hypothalamus', 'Adenohypophysis', 'Neurohypophysis', 'Pineal gland', 'Thyroid gland', 'Superior parathyroid gland', 'Inferior parathyroid gland', 'Suprarenal gland', 'Pancreas', 'Testis'];
+const glands = ['Hypothalamus', 'Adenohypophysis', 'Neurohypophysis', 'Pineal gland', 'Thyroid gland', 'Superior parathyroid gland', 'Inferior parathyroid gland', 'Suprarenal gland', 'Pancreas', 'Testis', 'Ovary'];
 const pulse = (offset: number) => (p: number) => 0.15 + 0.45 * Math.max(0, Math.sin(2 * Math.PI * (p - offset)));
 const endocrine: Lesson = {
   id: 'endocrine',
@@ -236,14 +236,14 @@ const endocrine: Lesson = {
   icon: '🧪',
   blurb: 'The pituitary, thyroid, adrenals and pancreas, and how negative feedback keeps levels steady',
   period: 8,
-  normal: [{ layers: ['endocrine'] }, { names: ['Hypothalamus', 'Pancreas', 'Testis'] }],
+  normal: [{ layers: ['endocrine'] }, { names: ['Hypothalamus', 'Pancreas', 'Testis', 'Ovary'] }],
   ghost: [{ layers: ['skin'] }],
   glows: [
     { names: ['Hypothalamus', 'Adenohypophysis', 'Neurohypophysis', 'Pineal gland'], color: 0xc7a1e0, glow: 0x9a5cff, level: pulse(0) },
     { names: ['Thyroid gland', 'Superior parathyroid gland', 'Inferior parathyroid gland'], color: 0xd98a7a, glow: 0xff9a5c, level: pulse(0.2) },
     { names: ['Suprarenal gland'], color: 0xe0b060, glow: 0xffc65c, level: pulse(0.4) },
     { names: ['Pancreas'], color: 0xe8c890, glow: 0xffe08a, level: pulse(0.6) },
-    { names: ['Testis'], color: 0xd8a0a0, glow: 0xff8aa8, level: pulse(0.8) },
+    { names: ['Testis', 'Ovary'], color: 0xd8a0a0, glow: 0xff8aa8, level: pulse(0.8) },
   ],
   diagram: hormoneDiagram,
   steps: [
@@ -252,7 +252,7 @@ const endocrine: Lesson = {
     { title: 'Parathyroid glands and calcium', names: ['Superior parathyroid gland', 'Inferior parathyroid gland'], stage: 1, text: 'Four small parathyroid glands behind the thyroid release parathyroid hormone (PTH) when blood calcium falls. PTH releases calcium from bone, makes the kidneys keep calcium, and activates vitamin D to absorb more from the gut.' },
     { title: 'Adrenal glands', names: ['Suprarenal gland'], stage: 1, text: 'The adrenal cortex makes cortisol (stress response, raises glucose), aldosterone (keeps sodium, loses potassium) and androgens. The adrenal medulla is part of the sympathetic system and releases adrenaline and noradrenaline for fight or flight.' },
     { title: 'Pancreas and blood glucose', names: ['Pancreas'], stage: 2, text: 'The islets of Langerhans hold β cells, which release insulin when glucose rises (cells take up glucose, the liver stores glycogen), and α cells, which release glucagon when glucose falls (the liver releases glucose). Together they keep fasting glucose at about 4 to 6 mmol/L.' },
-    { title: 'Pineal gland and gonads', names: ['Pineal gland', 'Testis'], stage: 2, text: 'The pineal gland releases melatonin in darkness, helping set the sleep–wake cycle. The testes make testosterone under LH; the ovaries make oestrogen and progesterone under FSH and LH. (The open atlas currently models only the male reproductive organs.)' },
+    { title: 'Pineal gland and gonads', names: ['Pineal gland', 'Testis', 'Ovary'], stage: 2, text: 'The pineal gland releases melatonin in darkness, helping set the sleep–wake cycle. The testes make testosterone under LH; the ovaries make oestrogen and progesterone under FSH and LH, in a monthly cycle. Use the Male / Female switch in the top bar to see either body.' },
   ],
   facts: [['Fasting glucose', 'about 4 to 6 mmol/L'], ['Main control pattern', 'negative feedback'], ['Master gland', 'pituitary, under the hypothalamus']],
 };

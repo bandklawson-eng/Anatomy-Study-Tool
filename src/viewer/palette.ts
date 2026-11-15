@@ -54,7 +54,15 @@ export function lookFor(key: string, colorByAction = false): Look {
   if (/^Cartilage/.test(key)) return { color: 0xbfd3dc, rough: 0.45 };
   if (/^Ligament/.test(key)) return { color: 0xd9dde2, rough: 0.5 };
   if (/^Articular capsule/.test(key)) return { color: 0xcfd6c4, rough: 0.55, opacity: 0.92 };
+  if (/^Fat-breast/.test(key)) return { color: 0xf2dc8c, rough: 0.6 };
   if (/^Fat/.test(key)) return { color: 0xf0d67a, rough: 0.6 };
+  if (/^Female-uterus/.test(key)) return { color: tint([0xc9605a, 0xbf5751, 0xd27069, 0xc96a63], key), rough: 0.5 };
+  if (/^Female-ovary/.test(key)) return { color: 0xe6c2a0, rough: 0.55 };
+  if (/^Female-tube/.test(key)) return { color: tint([0xe09a8f, 0xd88a80, 0xe6a597], key), rough: 0.45 };
+  if (/^Female-vagina/.test(key)) return { color: tint([0xd47f86, 0xcd7078, 0xdb8c92], key), rough: 0.45 };
+  if (/^Peritoneum-female/.test(key)) return { color: 0xeedcca, rough: 0.4, opacity: 0.42 };
+  if (/^Gland-breast/.test(key)) return { color: 0xe0a77a, rough: 0.5 };
+  if (/^Areola/.test(key)) return { color: tint([0xa8695a, 0x9c5e50, 0xb27464], key), rough: 0.55 };
   if (/^Fascia/.test(key)) return { color: 0xe6e0d6, rough: 0.5, opacity: 0.6 };
   if (/^Tendon/.test(key)) return { color: 0xe8e2d2, rough: 0.4 };
   if (/^Bursa/.test(key)) return { color: 0x9cc9e8, rough: 0.35, opacity: 0.85 };

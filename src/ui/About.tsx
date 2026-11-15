@@ -55,7 +55,8 @@ export function About({ atlas, onClose }: { atlas: Atlas; onClose: () => void })
         <ul>
           <li>3D models: <b>Z-Anatomy</b>, the open source atlas of anatomy (CC BY-SA 4.0), derived from <b>BodyParts3D</b>, © The Database Center for Life Science (CC BY-SA 2.1 Japan). Models were converted, simplified and compressed for the web; the processed models are shared under the same CC BY-SA 4.0 licence.</li>
           <li>Z-Anatomy also adapts: brain and white matter from the University of Washington; “Cranial Nerves and Foramina” by University of Dundee, CAHID (CC BY 4.0); “Anatomy of the Inner Ear” by University of Dundee School of Medicine (CC BY-NC-SA 4.0); “Kidney” by lissiecowley (CC BY-NC 4.0). Because of the last two, this app is for non-commercial study.</li>
-          <li>Reference articles: Wikipedia contributors, via Z-Anatomy (CC BY-SA).</li>
+          <li>Female anatomy (uterus, ovaries, uterine tubes, vagina, their ligaments and vessels, breasts, and the female skin of the breast and vulva): <b>HuBMAP Human Reference Atlas 3D Reference Object Library</b>, Visible Human Female, by Kristen Browne, Heidi Schlehlein and colleagues (NIH award OT2OD026671), CC BY 4.0. Changes: simplified, scaled and fitted into this body's pelvis and onto its chest. The ovarian vessels' pelvic course and the female urethra are simplified drawings.</li>
+          <li>Reference articles: Wikipedia contributors, via Z-Anatomy (CC BY-SA). Descriptions of the female structures were written for this app.</li>
           <li>Muscle origin, insertion, action and innervation tables and the physiology lessons were written for this project.</li>
         </ul>
         <p class="small muted">This is a study aid, not a medical device. Check details against your course textbook. Data build {atlas.meta.generated}.</p>
